@@ -1,5 +1,6 @@
-package com.example.testironsource
+package com.example.testironsource.model.retrofit
 
+import com.example.testironsource.model.Actions
 import retrofit2.Call
 import retrofit2.http.GET
 

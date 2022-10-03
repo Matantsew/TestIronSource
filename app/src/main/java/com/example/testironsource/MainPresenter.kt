@@ -1,13 +1,22 @@
 package com.example.testironsource
 
+import com.example.testironsource.model.Actions
+import com.example.testironsource.model.retrofit.RetrofitClient
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.concurrent.fixedRateTimer
 
 class MainPresenter(private val view: MainContract.View) :
     MainContract.Presenter,
     Callback<List<Actions>> {
+
+    private var coolDownPeriod = 0L
 
     init {
         view.initialize()
@@ -24,16 +33,18 @@ class MainPresenter(private val view: MainContract.View) :
 
         val chosenActions: MutableList<Int> = mutableListOf()
 
+        val dayFormat = SimpleDateFormat("u", Locale.getDefault())
         val calendar = Calendar.getInstance()
-        val dayOfWeek = calendar[Calendar.DAY_OF_WEEK]
+        val weekDay = dayFormat.format(calendar.time).toInt()
 
         list?.forEachIndexed { index, actions ->
 
-            val validDay = actions.validDays.contains(dayOfWeek)
+            val validDay = actions.validDays.contains(weekDay)
 
             if(highPriority < actions.priority && actions.enabled && validDay){
 
                 highPriority = actions.priority
+                chosenActions.clear()
                 chosenActions.add(index)
             }
             else if(highPriority == actions.priority && actions.enabled && validDay){
@@ -41,26 +52,27 @@ class MainPresenter(private val view: MainContract.View) :
             }
         }
 
-        fun getActionToRun(index: Int) = list?.get(chosenActions[index])
+        fun getActionToRun(index: Int) = list?.get(index)
 
         view.onActionButtonSetClickListener {
 
-            val type = if(chosenActions.isEmpty()) "none"
-            else if(chosenActions.size == 1){
-                getActionToRun(chosenActions[0])?.type
-            } else {
-                val random = Random()
-                getActionToRun(random.nextInt(chosenActions.size))?.type
-            }
+            val type = if (chosenActions.isEmpty()) "none"
+                else if (chosenActions.size == 1) {
+                    getActionToRun(chosenActions[0])?.type
+                } else {
+                    val random = Random()
+                    val randomIndex = random.nextInt(chosenActions.size)
+                    getActionToRun(chosenActions[randomIndex])?.type
+                }
 
-            when(type){
-                "animation" -> view.onAnimationAction()
-                "toast" -> view.onShowToastMessageAction()
-                "call" -> view.onCallAction()
-                "notification" -> view.onNotificationAction()
-                "none" -> {}
-                else -> {}
-            }
+                when (type) {
+                    "animation" -> view.onAnimationAction()
+                    "toast" -> view.onShowToastMessageAction()
+                    "call" -> view.onCallAction()
+                    "notification" -> view.onNotificationAction()
+                    "none" -> {}
+                    else -> {}
+                }
         }
     }
 

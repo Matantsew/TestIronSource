@@ -1,4 +1,4 @@
-package com.example.testironsource
+package com.example.testironsource.model
 
 import com.google.gson.annotations.SerializedName
 
