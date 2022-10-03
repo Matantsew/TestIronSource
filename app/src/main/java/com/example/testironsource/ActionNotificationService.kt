@@ -33,12 +33,12 @@ class ActionNotificationService(private val context: Context) {
 
         val notification = NotificationCompat.Builder(context, COUNTER_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_baseline_bathtub_24)
-            .setContentTitle("Increment counter")
+            .setContentTitle("Action")
             .setContentText(context.getString(R.string.action_is_notification))
             .setContentIntent(activityPendingIntent)
             .addAction(
                 R.drawable.ic_baseline_bathtub_24,
-                "Increment",
+                "Action",
                 incrementIntent
             )
             .build()
